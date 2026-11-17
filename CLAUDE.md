@@ -55,10 +55,12 @@ An app token (env var `SOCRATA_APP_TOKEN`, optional) raises rate limits.
 | DOB Complaints Received | `eabe-havv` | Predictor (illegal conversion, work w/o permit) | bin, house_number, house_street, date_entered, complaint_category, disposition_code |
 | DOB NOW Approved Permits | `rbx6-tga4` | Construction on lot / adjacent lots | bin, borough, block, lot, work_type, issued_date |
 | PLUTO | `64uk-42ks` | Building traits, matching | bbl, borough, block, lot, bldgclass, yearbuilt, unitsres, numfloors, latitude, longitude |
-| 311 Service Requests | `erm2-nwe9` | Tenant reports (heat, gas, electrical, smoke) | created_date, complaint_type, descriptor, bbl, incident_address. The `complaint_type` filter in `01_download.py` is a guess: check the real values first |
-| HPD Complaints and Problems | verify ID on Open Data | Tenant complaints | — |
-| HPD Registrations / Contacts | verify IDs | Owner info, portfolio linking | — |
-| FDNY Incidents Responded to by Fire Companies | verify ID | Secondary fire outcome (all structural fires) | incident type, date, location (may need geocoding) |
+| 311 Service Requests 2020–present | `erm2-nwe9` | Tenant reports (heat, gas, electrical, smoke) | created_date, agency, complaint_type, descriptor, bbl, incident_address. Filter (HPD only, `upper()` match on type + descriptor) checked against real values 2026-11-16; see `NYC311_WHERE` in `01_download.py` |
+| 311 Service Requests 2010–2019 | `76ig-c548` | Same, earlier years (split from `erm2-nwe9`) | Same columns. Complaint types renamed 2014-03-11 (`HEATING` → `HEAT/HOT WATER`, `NONCONST` → `SAFETY`) |
+| HPD Complaints and Problems | `ygpa-z7cr` (verified) | Tenant complaints | received_date, problem_id, complaint_id, building_id, block, lot, bbl, bin, type, major_category, minor_category, problem_code, complaint_status |
+| HPD Multiple Dwelling Registrations | `tesw-yqqr` (verified) | Owner info, portfolio linking | registrationid, buildingid, boroid, block, lot, bin, lastregistrationdate, registrationenddate |
+| HPD Registration Contacts | `feu5-w2e2` (verified) | Owner/agent names, joined on registrationid | registrationid, type, corporationname, firstname, lastname, business address |
+| FDNY Incidents Responded to by Fire Companies | `tm6d-hbzd` (verified) | Secondary fire outcome (all structural fires) | incident_type_desc (NFIRS `111 - Building fire` etc.), incident_date_time, street_highway, zip_code, borough_desc. **No BBL/BIN or house number**: street-level only, can't be joined to buildings reliably. Covers 2013-01 to 2025-09 only |
 
 **Verify before relying on any ID marked "verify"**: fetch `https://data.cityofnewyork.us/api/views/<id>.json`
 and confirm the dataset name and columns.
@@ -75,6 +77,7 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
 - **DOB Violations / ECB** use `boro` (1–5) and zero-padded strings: `block='05211'`, `lot='00074'`.
   Some rows have malformed lots (`'0031'`, `'0 137'`, empty): normalize by stripping non-digits
   and casting to int; log and drop unparseable rows.
+- **PLUTO** `bbl` comes back from the API as `1000010010.00000000`: cast via DOUBLE to BIGINT before joining.
 - **PLUTO** uses borough letters (`MN BX BK QN SI`). Condo lots are `75xx`; map to the billing BBL
   if you need building-level counts.
 - **DOB** is keyed by **BIN** (building), not BBL. One BBL can have several BINs and BINs change

@@ -1,0 +1,3 @@
+dataset,socrata_id,where,downloaded_utc,rows,file
+hpd_vacates,tb8q-a3ar,vacate_effective_date >= '2018-01-01T00:00:00',2026-11-17T03:19:08+00:00,5597,hpd_vacates.csv
+pluto,64uk-42ks,,2026-11-17T03:22:30+00:00,858284,pluto.csv
