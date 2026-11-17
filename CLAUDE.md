@@ -88,12 +88,23 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
 
 ## Study design (fires)
 
+0. **Study population: private multiple dwellings.** Cases *and* controls must have PLUTO
+   `unitsres >= 3` and not be NYCHA (`ownername` matching "HOUSING AUTHORITY"). Reason: the outcome
+   only exists where HPD has jurisdiction. 2018–2025 fire-vacate rates per 100k units: NYCHA 0.6,
+   1–2 units 3.8, 3–5 units 94, 6–19 units 139, 20+ units 79. Fires in 1–2 family homes and NYCHA
+   are handled by other agencies, so including them would compare HPD-watched buildings with
+   unwatched ones. State findings as "among privately owned multiple dwellings". Do **not** use
+   `kj4p-ruqc` (Buildings Subject to HPD Jurisdiction) to define the population: one of its entry
+   criteria is "HPD has received a complaint", so membership itself reflects HPD attention.
 1. **Cases** (`pipeline/02_build_cases.py`): HPD vacates with `primary_vacate_reason = 'Fire Damage'`,
-   2018-01-01 to 2025-12-31, residential buildings (PLUTO class A, B, C, D, R, S) built before 2000.
-   One case per BBL (first fire in window). Output `data/processed/cases.parquet`.
+   2018-01-01 to 2025-12-31, in the study population, residential buildings (PLUTO class A, B, C, D,
+   R, S) built before 2000. One case per BBL (first fire in window). Add an event-period flag
+   (see Open questions). Output `data/processed/cases.parquet`.
 2. **Controls** (`03_match_controls.py`): for each case, up to 10 buildings on the same block, else
-   the same census tract, with `unitsres` between 1/3× and 3× the case's, residential class, no
-   fire vacate in the window. Keep a `match_set` id. Output `matched.parquet`.
+   the same census tract, in the study population, with `unitsres` between 1/3× and 3× the case's
+   (and >= 3), residential class, no fire vacate in the window. Keep a `match_set` id. Write a
+   balance table (units, age, floors, class, program status; cases vs controls) to `outputs/tables/`.
+   Output `matched.parquet`.
 3. **Features** (`04_features.py`): for every building in a match set, using the case's cutoff
    date (`event_date - gap_days`), compute over 1-, 3- and 5-year lookbacks:
    - HPD violations by class (A, B, C, I), per unit and raw
@@ -115,8 +126,14 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
    - Then LightGBM + SHAP for interactions (exploratory; label it so on the site).
    - **Temporal holdout**: fit on events 2018–2023, evaluate ranking on 2024–2025 (AUC within match
      sets, and top-decile capture).
-5. **Bias checks**: rerun with HPD *complaint* counts as a covariate (inspection-intensity bias);
-   split by building size (≤ 5 units vs larger); rerun with 180- and 365-day gaps.
+5. **Bias checks** — HPD attention differs *within* the study population too, and both the
+   predictors (violations) and the outcome (vacates) come from HPD:
+   - rerun with HPD *complaint* counts as a covariate (inspection-intensity bias);
+   - adjust for or stratify on enforcement/program status: rent stabilization, Alternative
+     Enforcement Program (AEP), HPD-financed regulatory agreements (verify dataset IDs first);
+   - **placebo outcome**: same pipeline with `primary_vacate_reason = 'Illegal Occupancy'`. If
+     Class C/unit predicts it as strongly as fire, the signal is HPD attention, not fire risk;
+   - split by building size (3–5 units vs larger); rerun with 180- and 365-day gaps.
 
 ## Open questions
 
@@ -129,6 +146,26 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
   Until resolved: add an event-period flag (before/after 2024-07-01) to cases, report results by
   period, include a period term as a sensitivity check, and label the 2024–2025 temporal holdout as
   spanning the change. FDNY's own vacate list (`n5xc-7jfa`, 357 rows total) is too sparse to cross-check.
+
+## Ideas for later (not in current scope)
+
+Separate research questions, not limited to fire. Each would get its own question, outcome and
+write-up; reuse the pipeline and data where it fits.
+
+- **Small buildings (1–2 units, and 3–5): where are living conditions worst?** These buildings are
+  largely outside HPD's view, so the signals come from elsewhere: 311 reports, DOB complaints
+  (illegal conversion, basement/cellar occupancy), ECB violations, DOB vacates. First step is
+  defining "worst conditions" in a way public records can measure, and checking how much each
+  source under-counts small buildings.
+- **Owner portfolios: can a landlord's track record flag buildings at risk of poor conditions or
+  other harms?** Link buildings to common owners/agents via HPD Registration Contacts (`feu5-w2e2`:
+  names, corporations, business addresses), as JustFix's "Who Owns What" does; ACRIS for dated
+  ownership changes. Test whether patterns across an owner's *other* buildings (violations, vacates,
+  litigation, harassment findings) predict outcomes in a given building. Ownership must be
+  time-stamped as of each cutoff date to avoid leakage. Define "bad actor" only from objective public
+  records (e.g. AEP, Public Advocate Worst Landlords list, court convictions), never by judgment.
+  Ground rule 4 applies: results publish as aggregates; no named buildings or landlords unless the
+  user explicitly asks and each entry is checked against source records.
 
 ## Definition of done per phase
 
