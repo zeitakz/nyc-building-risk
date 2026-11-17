@@ -1,0 +1,38 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "NYC Building Risk Signals"
+  description: "Can public records flag NYC buildings at risk of fire before it happens?"
+  page-navigation: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: fire.qmd
+        text: Fire findings
+      - href: case-study.qmd
+        text: "Case study: 2625 Bedford"
+      - href: method.qmd
+        text: Method
+      - href: data.qmd
+        text: Data & code
+    right:
+      - icon: github
+        href: https://github.com/zeitakz/nyc-building-risk
+  page-footer:
+    left: "Public data from NYC Open Data. A risk signal is not proof of fault."
+
+format:
+  html:
+    theme: [cosmo, styles.scss]
+    toc: true
+    code-fold: true
+    code-summary: "Show code"
+    fig-dpi: 160
+
+execute:
+  echo: false
+  warning: false
+  freeze: auto

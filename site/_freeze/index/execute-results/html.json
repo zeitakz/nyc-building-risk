@@ -1,0 +1,12 @@
+{
+  "hash": "019314b623cedd047b1614195110cddf",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Can public records flag NYC buildings at risk of fire?\"\nsubtitle: \"Testing which housing and building violations show up before serious fires\"\ntoc: false\n---\n\n\n\n::: {.lead-finding}\nIn a pilot of 7 NYC buildings vacated after fires, their HPD \"immediately\nhazardous\" (Class C) violations per apartment ranked on average at the\n**87th percentile** of comparable buildings on their own block,\nusing only records from before the fire.\n:::\n\nNew York publishes millions of housing and building records: every HPD code violation, DOB\ncomplaint, stop-work order and permit. This project asks whether those records, read together,\ncan identify buildings at higher risk of a serious fire **before** it happens, and which patterns\nof owner neglect carry the signal.\n\n## Where things stand\n\n| Stage | Status |\n|---|---|\n| Pilot: fires (7 cases) | Done. HPD violations are a strong signal; DOB alone is not |\n| Pilot: structural collapse (9 cases) | Done. DOB history is the signal; HPD helps only alongside it |\n| Case study: 2625 Bedford Ave | Done. City records showed warnings months before the collapse |\n| Full study: every fire-damage vacate since 2018 | In progress |\n\n## Read next\n\n- [Fire findings](fire.qmd): the pilot result, building by building\n- [Case study: 2625 Bedford Ave](case-study.qmd): what the records showed before a Flatbush collapse\n- [Method](method.qmd): how buildings are compared, and the biases to watch\n- [Data & code](data.qmd): sources and how to rebuild every number\n\n::: {.caveat}\nA risk signal is a reason to look more closely at a building, not proof that an owner caused a\nfire. This site publishes patterns, not lists of individual buildings or landlords.\n:::\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

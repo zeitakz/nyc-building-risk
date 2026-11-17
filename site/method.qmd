@@ -1,0 +1,45 @@
+---
+title: "Method"
+subtitle: "Compare each fire building with similar buildings on its own block, using only earlier records"
+---
+
+## The comparison
+
+1. **Cases.** Buildings HPD ordered vacated for fire damage (pilot: January 2025).
+2. **Comparison buildings.** Residential buildings on the same block, of similar size
+   (from about a third to three times as many apartments), built before 2000. Same-block
+   matching holds neighborhood, era and building stock roughly constant.
+3. **Records before the event only.** Every count uses records dated before the cutoff
+   (pilot: January 1, 2025). The full study adds a 60-day gap before each fire.
+4. **Rank within the block.** Each case's value is ranked against its own neighbors
+   (0% = lowest on the block, 100% = highest, ties split).
+5. **Test against chance.** A permutation test repeatedly picks a random building on each block
+   as a fake "case." The p-value is the share of 20,000 shuffles whose average rank is as high
+   as the real cases'.
+
+## Signals measured (pilot)
+
+| Signal | Source | Scaled by size |
+|---|---|---|
+| Class C ("immediately hazardous") violations | HPD | per apartment |
+| All A, B and C violations | HPD | per apartment |
+| Smoke and CO detector violations | HPD (text search) | per apartment |
+| Registration failures (Class I) | HPD | no |
+| Maintenance, emergency, unsafe-building and uncertified-hazard violations | DOB | no |
+| Missed boiler filings | DOB | no |
+
+## Known biases
+
+- **Inspection intensity.** Violations exist only where someone inspected, and inspections follow
+  tenant complaints. A building with organized tenants can look worse than a neglected building
+  whose tenants don't call.
+- **Coverage.** HPD covers rental housing; one- and two-family owner-occupied homes rarely appear.
+- **Timing.** Violations written right after a fire can look like warnings unless records near the
+  event are excluded.
+- **Small samples.** The pilot has 7 fire cases and 9 collapse cases.
+
+## Full-study plan
+
+Conditional logistic regression on matched sets (the standard model for this design), a
+machine-learning pass (LightGBM with SHAP explanations) to find combinations, and a temporal
+holdout: fit on 2018–2023 fires, then test how well the signals rank 2024–2025 fires.

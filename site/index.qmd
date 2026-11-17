@@ -1,0 +1,45 @@
+---
+title: "Can public records flag NYC buildings at risk of fire?"
+subtitle: "Testing which housing and building violations show up before serious fires"
+toc: false
+---
+
+```{python}
+from _pilot import *
+from fire_data import blocks as fire_blocks
+fire = {r["feature"]: r for r in score(fire_blocks, FIRE_FEATURES)}
+c = fire["HPD Class C violations per apartment"]
+```
+
+::: {.lead-finding}
+In a pilot of `{python} len(fire_blocks)` NYC buildings vacated after fires, their HPD "immediately
+hazardous" (Class C) violations per apartment ranked on average at the
+**`{python} f"{round(c['mean_pct']*100)}th"` percentile** of comparable buildings on their own block,
+using only records from before the fire.
+:::
+
+New York publishes millions of housing and building records: every HPD code violation, DOB
+complaint, stop-work order and permit. This project asks whether those records, read together,
+can identify buildings at higher risk of a serious fire **before** it happens, and which patterns
+of owner neglect carry the signal.
+
+## Where things stand
+
+| Stage | Status |
+|---|---|
+| Pilot: fires (`{python} len(fire_blocks)` cases) | Done. HPD violations are a strong signal; DOB alone is not |
+| Pilot: structural collapse (9 cases) | Done. DOB history is the signal; HPD helps only alongside it |
+| Case study: 2625 Bedford Ave | Done. City records showed warnings months before the collapse |
+| Full study: every fire-damage vacate since 2018 | In progress |
+
+## Read next
+
+- [Fire findings](fire.qmd): the pilot result, building by building
+- [Case study: 2625 Bedford Ave](case-study.qmd): what the records showed before a Flatbush collapse
+- [Method](method.qmd): how buildings are compared, and the biases to watch
+- [Data & code](data.qmd): sources and how to rebuild every number
+
+::: {.caveat}
+A risk signal is a reason to look more closely at a building, not proof that an owner caused a
+fire. This site publishes patterns, not lists of individual buildings or landlords.
+:::

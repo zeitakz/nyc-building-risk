@@ -1,0 +1,35 @@
+---
+title: "Data & code"
+---
+
+All data is public, from [NYC Open Data](https://opendata.cityofnewyork.us/). The repo downloads it;
+no raw records are stored here.
+
+| Dataset | Open Data ID | Used for |
+|---|---|---|
+| HPD Order to Repair/Vacate Orders | `tb8q-a3ar` | Fire cases (reason "Fire Damage") |
+| HPD Housing Maintenance Code Violations | `wvxf-dwi5` | Main predictors |
+| DOB Violations | `3h2n-5cm9` | Predictors; fire and collapse records |
+| DOB ECB Violations | `6bgk-3dad` | Severity and penalties |
+| DOB Complaints Received | `eabe-havv` | Illegal conversion, work without permit |
+| DOB NOW Approved Permits | `rbx6-tga4` | Construction activity |
+| PLUTO | `64uk-42ks` | Building traits, matching |
+| 311 Service Requests | `erm2-nwe9` | Tenant reports (full study) |
+
+## Rebuild everything
+
+```bash
+git clone https://github.com/zeitakz/nyc-building-risk
+cd nyc-building-risk
+pip install -r requirements.txt
+python pilot/fire_analyze.py          # pilot fire result
+python pipeline/01_download.py --list # datasets the full pipeline downloads
+quarto preview site                   # this website
+```
+
+## About the pilot data
+
+The pilot used the Open Data API's server-side aggregation (counts by lot and violation class) one
+block at a time. Those counts are saved in `pilot/fire_data.py` and `pilot/collapse_data.py`, so the
+pilot can be checked without downloading anything. The full pipeline rebuilds them from the raw
+datasets.

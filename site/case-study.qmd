@@ -1,0 +1,45 @@
+---
+title: "Case study: 2625 Bedford Avenue"
+subtitle: "City records flagged the construction site months before the building next door collapsed"
+---
+
+On November 11, 2026, the three-story building at **1321 Flatbush Avenue** in Brooklyn partially
+collapsed, and at least one person died. It stood next to a construction site at
+**2625 Bedford Avenue**, where a one-story building had been demolished. A DOB violation issued that
+day attributes the collapse to "unsafe construction at 2625 Bedford Ave."
+
+The public record shows warning signs at the construction site, not at the building that fell.
+
+## Timeline from public records
+
+| Date (2026) | Record | Source |
+|---|---|---|
+| Mar 11 | Construction fence permit issued for the site | DOB NOW permits |
+| Mar 18 | Complaint: construction contrary to or beyond approved plans (category 83) | DOB complaints |
+| ~Mar 20 | Stop-work order in place (dated from a later violation that cites site photos taken then) | ECB violations |
+| Apr 23 | Class 1 violation, the most serious class, for continuing work while under a stop-work order; $10,000 penalty, later resolved | ECB violations |
+| Sep | Earthwork and excavation-support permits issued | News reports (not independently checked) |
+| Nov 10 | New fence permit, under a different contractor | DOB NOW permits |
+| Nov 11 | Collapse; full stop-work orders, rear-yard vacates on adjoining lots, Class 1 violation for failing to safeguard | DOB and ECB violations |
+
+## The building that collapsed
+
+1321 Flatbush Avenue (four apartments, built 1930) had a long list of HPD violations the owner
+never corrected, including Class C violations from August 2024 for sprinkler water supply,
+self-closing doors and exposed wiring, and a leaking roof cited in 2022, 2024 and 2026. None
+described cracks, bulging or settlement. Its only DOB violations before the collapse were from 2019,
+for an advertising sign. No DOB complaints had been filed about it.
+
+## What this case suggests
+
+The strongest signal sat on the **adjacent lot**: a complaint about work beyond its permits, a
+stop-work order that was ignored, then a contractor change, all next to an old masonry building in
+poor repair. That points to a test the building-by-building approach misses: **construction
+negligence on a neighboring lot**, weighted by the condition of the buildings around it.
+
+::: {.caveat}
+Investigators had not determined the cause at the time of writing. This page reports what public
+records show; it does not assign fault. Records from NYC Open Data: DOB Violations (`3h2n-5cm9`),
+ECB Violations (`6bgk-3dad`), DOB Complaints (`eabe-havv`), DOB NOW Permits (`rbx6-tga4`),
+HPD Violations (`wvxf-dwi5`).
+:::

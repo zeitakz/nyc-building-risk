@@ -1,0 +1,65 @@
+---
+title: "Fire findings (pilot)"
+subtitle: "Buildings vacated after fires had far more hazardous HPD violations than their neighbors"
+---
+
+```{python}
+from _pilot import *
+from fire_data import blocks as fire_blocks
+from collapse_data import blocks as collapse_blocks
+fire_rows = score(fire_blocks, FIRE_FEATURES)
+fire = {r["feature"]: r for r in fire_rows}
+c = fire["HPD Class C violations per apartment"]
+top = sum(p == 1.0 for p in c["per_case"])
+```
+
+Of the `{python} len(fire_blocks)` buildings in the pilot, `{python} top` had the **highest** rate
+of Class C ("immediately hazardous") HPD violations per apartment among comparable buildings on
+their block. DOB records alone did not set them apart.
+
+## How each record ranked
+
+Each fire building was compared with similar residential buildings on its own block
+(`{python} n_controls(fire_blocks)` in total), using only records dated before 2025. A rank of 50%
+means typical for the block; 100% means higher than every neighbor.
+
+```{python}
+#| fig-alt: "Dot chart: HPD Class C violations per apartment rank highest, near 87 percent; DOB records rank near 50 to 60 percent."
+fig = rank_chart(fire_rows, "HPD violations set fire buildings apart; DOB records did not")
+```
+
+Blue dots are unlikely to be chance (permutation test, p < 0.05); gray dots are not.
+
+## Building by building
+
+```{python}
+import pandas as pd
+names = {"BK": "Brooklyn", "BX": "Bronx", "MN": "Manhattan", "QN": "Queens"}
+rows = []
+for (b, d), cc, sm in zip(fire_blocks.items(), c["per_case"], [None]*len(fire_blocks)):
+    boro, blk = b.split(" ")[0].split("-")
+    u, abc, cnt = d["lots"][d["case"]][:3]
+    rows.append({"Location": f"{names[boro]}, block {blk}", "Apartments": u,
+                 "Class C violations": cnt, "Class C per apt.": round(cnt / u, 1),
+                 "Rank on block": f"{cc:.0%}", "Neighbors compared": len(d["lots"]) - 1})
+pd.DataFrame(rows).style.hide(axis="index").format({"Class C per apt.": "{:.1f}"})
+```
+
+The one clear exception is the Queens building, which had a nearly clean HPD record before its fire.
+
+## What it means, and what it doesn't
+
+- **The signal is HPD-specific.** For fires, conditions tenants report to HPD (wiring, detectors,
+  doors, heat, general disrepair) carry the signal. In a matching pilot on structural collapses,
+  the pattern reversed: DOB history mattered and HPD alone did not.
+- **Seven cases is a lead, not a finding.** The full study scales this to every HPD fire-damage
+  vacate since 2018, with matched controls and a held-out test on later fires.
+- **Some violations may follow the fire.** If a fire happened in late 2024 and the vacate order came in
+  January 2025, post-fire inspections could count as "warnings." The full study only uses records
+  from at least 60 days before each fire.
+- **More complaints mean more inspections.** Buildings with active tenants generate more violations.
+  The full study controls for complaint volume.
+
+::: {.caveat}
+Method: [how the comparison works](method.qmd). Code: `pilot/fire_analyze.py` and `pilot/pilot_stats.py`.
+:::

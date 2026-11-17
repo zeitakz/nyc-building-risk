@@ -1,0 +1,11 @@
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/raw/MANIFEST.csv
+site/_site/
+site/.quarto/
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
