@@ -118,6 +118,18 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
 5. **Bias checks**: rerun with HPD *complaint* counts as a covariate (inspection-intensity bias);
    split by building size (≤ 5 units vs larger); rerun with 180- and 365-day gaps.
 
+## Open questions
+
+- **Fire-vacate jump from FY2025 (cause unknown, revisit before Phase 2 and Phase 4).**
+  Fire-damage vacates in `tb8q-a3ar` by fiscal year: FY24 287, FY25 436, FY26 578; entire-building
+  vacates 35 → 51 → 114. HPD's FY2026 Mayor's Management Report confirms a 37% rise in
+  Fire Department vacate orders after fire damage, with no stated reason. FDNY NFIRS "111 - Building
+  fire" counts (`tm6d-hbzd`, Jan–Sep) were flat or falling (2024: 1,243; 2025: 1,268), so vacates per
+  fire rose: likely a practice change (lower threshold, more inspections), not more fires. Unconfirmed.
+  Until resolved: add an event-period flag (before/after 2024-07-01) to cases, report results by
+  period, include a period term as a sensitivity check, and label the 2024–2025 temporal holdout as
+  spanning the change. FDNY's own vacate list (`n5xc-7jfa`, 357 rows total) is too sparse to cross-check.
+
 ## Definition of done per phase
 
 - **Phase 1, data:** every dataset in the table above downloaded for 2010–present, row counts
