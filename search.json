@@ -1,0 +1,135 @@
+[
+  {
+    "objectID": "method.html",
+    "href": "method.html",
+    "title": "Method",
+    "section": "",
+    "text": "Cases. Buildings HPD ordered vacated for fire damage (pilot: January 2025).\nComparison buildings. Residential buildings on the same block, of similar size (from about a third to three times as many apartments), built before 2000. Same-block matching holds neighborhood, era and building stock roughly constant.\nRecords before the event only. Every count uses records dated before the cutoff (pilot: January 1, 2025). The full study adds a 60-day gap before each fire.\nRank within the block. Each case’s value is ranked against its own neighbors (0% = lowest on the block, 100% = highest, ties split).\nTest against chance. A permutation test repeatedly picks a random building on each block as a fake “case.” The p-value is the share of 20,000 shuffles whose average rank is as high as the real cases’."
+  },
+  {
+    "objectID": "method.html#the-comparison",
+    "href": "method.html#the-comparison",
+    "title": "Method",
+    "section": "",
+    "text": "Cases. Buildings HPD ordered vacated for fire damage (pilot: January 2025).\nComparison buildings. Residential buildings on the same block, of similar size (from about a third to three times as many apartments), built before 2000. Same-block matching holds neighborhood, era and building stock roughly constant.\nRecords before the event only. Every count uses records dated before the cutoff (pilot: January 1, 2025). The full study adds a 60-day gap before each fire.\nRank within the block. Each case’s value is ranked against its own neighbors (0% = lowest on the block, 100% = highest, ties split).\nTest against chance. A permutation test repeatedly picks a random building on each block as a fake “case.” The p-value is the share of 20,000 shuffles whose average rank is as high as the real cases’."
+  },
+  {
+    "objectID": "method.html#signals-measured-pilot",
+    "href": "method.html#signals-measured-pilot",
+    "title": "Method",
+    "section": "Signals measured (pilot)",
+    "text": "Signals measured (pilot)\n\n\n\n\n\n\n\n\nSignal\nSource\nScaled by size\n\n\n\n\nClass C (“immediately hazardous”) violations\nHPD\nper apartment\n\n\nAll A, B and C violations\nHPD\nper apartment\n\n\nSmoke and CO detector violations\nHPD (text search)\nper apartment\n\n\nRegistration failures (Class I)\nHPD\nno\n\n\nMaintenance, emergency, unsafe-building and uncertified-hazard violations\nDOB\nno\n\n\nMissed boiler filings\nDOB\nno"
+  },
+  {
+    "objectID": "method.html#known-biases",
+    "href": "method.html#known-biases",
+    "title": "Method",
+    "section": "Known biases",
+    "text": "Known biases\n\nInspection intensity. Violations exist only where someone inspected, and inspections follow tenant complaints. A building with organized tenants can look worse than a neglected building whose tenants don’t call.\nCoverage. HPD covers rental housing; one- and two-family owner-occupied homes rarely appear.\nTiming. Violations written right after a fire can look like warnings unless records near the event are excluded.\nSmall samples. The pilot has 7 fire cases and 9 collapse cases."
+  },
+  {
+    "objectID": "method.html#full-study-plan",
+    "href": "method.html#full-study-plan",
+    "title": "Method",
+    "section": "Full-study plan",
+    "text": "Full-study plan\nConditional logistic regression on matched sets (the standard model for this design), a machine-learning pass (LightGBM with SHAP explanations) to find combinations, and a temporal holdout: fit on 2018–2023 fires, then test how well the signals rank 2024–2025 fires."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Can public records flag NYC buildings at risk of fire?",
+    "section": "",
+    "text": "In a pilot of 7 NYC buildings vacated after fires, their HPD “immediately hazardous” (Class C) violations per apartment ranked on average at the 87th percentile of comparable buildings on their own block, using only records from before the fire.\nNew York publishes millions of housing and building records: every HPD code violation, DOB complaint, stop-work order and permit. This project asks whether those records, read together, can identify buildings at higher risk of a serious fire before it happens, and which patterns of owner neglect carry the signal."
+  },
+  {
+    "objectID": "index.html#where-things-stand",
+    "href": "index.html#where-things-stand",
+    "title": "Can public records flag NYC buildings at risk of fire?",
+    "section": "Where things stand",
+    "text": "Where things stand\n\n\n\n\n\n\n\nStage\nStatus\n\n\n\n\nPilot: fires (7 cases)\nDone. HPD violations are a strong signal; DOB alone is not\n\n\nPilot: structural collapse (9 cases)\nDone. DOB history is the signal; HPD helps only alongside it\n\n\nCase study: 2625 Bedford Ave\nDone. City records showed warnings months before the collapse\n\n\nFull study: every fire-damage vacate since 2018\nIn progress"
+  },
+  {
+    "objectID": "index.html#read-next",
+    "href": "index.html#read-next",
+    "title": "Can public records flag NYC buildings at risk of fire?",
+    "section": "Read next",
+    "text": "Read next\n\nFire findings: the pilot result, building by building\nCase study: 2625 Bedford Ave: what the records showed before a Flatbush collapse\nMethod: how buildings are compared, and the biases to watch\nData & code: sources and how to rebuild every number\n\n\nA risk signal is a reason to look more closely at a building, not proof that an owner caused a fire. This site publishes patterns, not lists of individual buildings or landlords."
+  },
+  {
+    "objectID": "case-study.html",
+    "href": "case-study.html",
+    "title": "Case study: 2625 Bedford Avenue",
+    "section": "",
+    "text": "On November 11, 2026, the three-story building at 1321 Flatbush Avenue in Brooklyn partially collapsed, and at least one person died. It stood next to a construction site at 2625 Bedford Avenue, where a one-story building had been demolished. A DOB violation issued that day attributes the collapse to “unsafe construction at 2625 Bedford Ave.”\nThe public record shows warning signs at the construction site, not at the building that fell."
+  },
+  {
+    "objectID": "case-study.html#timeline-from-public-records",
+    "href": "case-study.html#timeline-from-public-records",
+    "title": "Case study: 2625 Bedford Avenue",
+    "section": "Timeline from public records",
+    "text": "Timeline from public records\n\n\n\n\n\n\n\n\nDate (2026)\nRecord\nSource\n\n\n\n\nMar 11\nConstruction fence permit issued for the site\nDOB NOW permits\n\n\nMar 18\nComplaint: construction contrary to or beyond approved plans (category 83)\nDOB complaints\n\n\n~Mar 20\nStop-work order in place (dated from a later violation that cites site photos taken then)\nECB violations\n\n\nApr 23\nClass 1 violation, the most serious class, for continuing work while under a stop-work order; $10,000 penalty, later resolved\nECB violations\n\n\nSep\nEarthwork and excavation-support permits issued\nNews reports (not independently checked)\n\n\nNov 10\nNew fence permit, under a different contractor\nDOB NOW permits\n\n\nNov 11\nCollapse; full stop-work orders, rear-yard vacates on adjoining lots, Class 1 violation for failing to safeguard\nDOB and ECB violations"
+  },
+  {
+    "objectID": "case-study.html#the-building-that-collapsed",
+    "href": "case-study.html#the-building-that-collapsed",
+    "title": "Case study: 2625 Bedford Avenue",
+    "section": "The building that collapsed",
+    "text": "The building that collapsed\n1321 Flatbush Avenue (four apartments, built 1930) had a long list of HPD violations the owner never corrected, including Class C violations from August 2024 for sprinkler water supply, self-closing doors and exposed wiring, and a leaking roof cited in 2022, 2024 and 2026. None described cracks, bulging or settlement. Its only DOB violations before the collapse were from 2019, for an advertising sign. No DOB complaints had been filed about it."
+  },
+  {
+    "objectID": "case-study.html#what-this-case-suggests",
+    "href": "case-study.html#what-this-case-suggests",
+    "title": "Case study: 2625 Bedford Avenue",
+    "section": "What this case suggests",
+    "text": "What this case suggests\nThe strongest signal sat on the adjacent lot: a complaint about work beyond its permits, a stop-work order that was ignored, then a contractor change, all next to an old masonry building in poor repair. That points to a test the building-by-building approach misses: construction negligence on a neighboring lot, weighted by the condition of the buildings around it.\n\nInvestigators had not determined the cause at the time of writing. This page reports what public records show; it does not assign fault. Records from NYC Open Data: DOB Violations (3h2n-5cm9), ECB Violations (6bgk-3dad), DOB Complaints (eabe-havv), DOB NOW Permits (rbx6-tga4), HPD Violations (wvxf-dwi5)."
+  },
+  {
+    "objectID": "fire.html",
+    "href": "fire.html",
+    "title": "Fire findings (pilot)",
+    "section": "",
+    "text": "Of the 7 buildings in the pilot, 4 had the highest rate of Class C (“immediately hazardous”) HPD violations per apartment among comparable buildings on their block. DOB records alone did not set them apart."
+  },
+  {
+    "objectID": "fire.html#how-each-record-ranked",
+    "href": "fire.html#how-each-record-ranked",
+    "title": "Fire findings (pilot)",
+    "section": "How each record ranked",
+    "text": "How each record ranked\nEach fire building was compared with similar residential buildings on its own block (137 in total), using only records dated before 2025. A rank of 50% means typical for the block; 100% means higher than every neighbor.\n\n\n\n\n\n\n\n\n\nBlue dots are unlikely to be chance (permutation test, p &lt; 0.05); gray dots are not."
+  },
+  {
+    "objectID": "fire.html#building-by-building",
+    "href": "fire.html#building-by-building",
+    "title": "Fire findings (pilot)",
+    "section": "Building by building",
+    "text": "Building by building\n\n\n\n\n\n\n\nLocation\nApartments\nClass C violations\nClass C per apt.\nRank on block\nNeighbors compared\n\n\n\n\nBrooklyn, block 1834\n8\n238\n29.8\n100%\n39\n\n\nBronx, block 3257\n27\n163\n6.0\n100%\n1\n\n\nManhattan, block 2046\n24\n131\n5.5\n81%\n21\n\n\nBrooklyn, block 4755\n6\n155\n25.8\n100%\n25\n\n\nQueens, block 734\n6\n10\n1.7\n81%\n27\n\n\nBronx, block 2522\n24\n95\n4.0\n46%\n13\n\n\nBrooklyn, block 3790\n4\n112\n28.0\n100%\n11\n\n\n\n\n\nThe one clear exception is the Queens building, which had a nearly clean HPD record before its fire."
+  },
+  {
+    "objectID": "fire.html#what-it-means-and-what-it-doesnt",
+    "href": "fire.html#what-it-means-and-what-it-doesnt",
+    "title": "Fire findings (pilot)",
+    "section": "What it means, and what it doesn’t",
+    "text": "What it means, and what it doesn’t\n\nThe signal is HPD-specific. For fires, conditions tenants report to HPD (wiring, detectors, doors, heat, general disrepair) carry the signal. In a matching pilot on structural collapses, the pattern reversed: DOB history mattered and HPD alone did not.\nSeven cases is a lead, not a finding. The full study scales this to every HPD fire-damage vacate since 2018, with matched controls and a held-out test on later fires.\nSome violations may follow the fire. If a fire happened in late 2024 and the vacate order came in January 2025, post-fire inspections could count as “warnings.” The full study only uses records from at least 60 days before each fire.\nMore complaints mean more inspections. Buildings with active tenants generate more violations. The full study controls for complaint volume.\n\n\nMethod: how the comparison works. Code: pilot/fire_analyze.py and pilot/pilot_stats.py."
+  },
+  {
+    "objectID": "data.html",
+    "href": "data.html",
+    "title": "Data & code",
+    "section": "",
+    "text": "All data is public, from NYC Open Data. The repo downloads it; no raw records are stored here."
+  },
+  {
+    "objectID": "data.html#rebuild-everything",
+    "href": "data.html#rebuild-everything",
+    "title": "Data & code",
+    "section": "Rebuild everything",
+    "text": "Rebuild everything\ngit clone https://github.com/zeitakz/nyc-building-risk\ncd nyc-building-risk\npip install -r requirements.txt\npython pilot/fire_analyze.py          # pilot fire result\npython pipeline/01_download.py --list # datasets the full pipeline downloads\nquarto preview site                   # this website"
+  },
+  {
+    "objectID": "data.html#about-the-pilot-data",
+    "href": "data.html#about-the-pilot-data",
+    "title": "Data & code",
+    "section": "About the pilot data",
+    "text": "About the pilot data\nThe pilot used the Open Data API’s server-side aggregation (counts by lot and violation class) one block at a time. Those counts are saved in pilot/fire_data.py and pilot/collapse_data.py, so the pilot can be checked without downloading anything. The full pipeline rebuilds them from the raw datasets."
+  }
+]
