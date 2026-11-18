@@ -1,0 +1,8 @@
+block,lots,case_bbl_has_fire_vacate_jan_feb_2025,case_c_pilot,case_c_downloaded,case_abc_pilot,case_abc_downloaded,block_c_pilot,block_c_downloaded,pctile_pilot,pctile_downloaded
+BK-1834 (400 Tompkins Av),40,True,238,236,770,751,679,608,1.0,1.0
+BX-3257 (3030 Heath Av),2,True,163,162,456,455,201,200,1.0,1.0
+MN-2046 (216 Bradhurst Av),22,True,131,130,421,420,1474,1338,0.81,0.857
+BK-4755 (642 E 96 St),26,True,155,151,585,519,516,470,1.0,1.0
+QN-734 (32-33 48 St),28,True,10,10,18,11,140,100,0.815,0.87
+BX-2522 (1390 Ogden Av),14,True,95,95,372,372,1870,1843,0.462,0.462
+BK-3790 (516 Vermont St),12,True,112,112,446,439,201,199,1.0,1.0

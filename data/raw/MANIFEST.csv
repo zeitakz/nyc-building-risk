@@ -1,3 +1,15 @@
 dataset,socrata_id,where,downloaded_utc,rows,file
 hpd_vacates,tb8q-a3ar,vacate_effective_date >= '2018-01-01T00:00:00',2026-11-17T03:19:08+00:00,5597,hpd_vacates.csv
 pluto,64uk-42ks,,2026-11-17T03:22:30+00:00,858284,pluto.csv
+hpd_vacates,tb8q-a3ar,,2026-11-18T00:10:41+00:00,9008,hpd_vacates.csv
+dob_violations,3h2n-5cm9,issue_date >= '20100101',2026-11-18T00:14:53+00:00,1199738,dob_violations.csv
+dob_ecb,6bgk-3dad,issue_date >= '20100101',2026-11-18T00:27:26+00:00,1058721,dob_ecb.csv
+dob_complaints,eabe-havv,,2026-11-18T00:41:56+00:00,3155382,dob_complaints.csv
+dob_now_permits,rbx6-tga4,issued_date >= '2010-01-01T00:00:00',2026-11-18T00:52:02+00:00,1031190,dob_now_permits.csv
+hpd_registrations,tesw-yqqr,,2026-11-18T00:52:29+00:00,187127,hpd_registrations.csv
+hpd_contacts,feu5-w2e2,,2026-11-18T00:54:22+00:00,744753,hpd_contacts.csv
+fdny_incidents,tm6d-hbzd,"starts_with(incident_type_desc, '1') AND incident_date_time >= '2010-01-01T00:00:00'",2026-11-18T00:58:25+00:00,447169,fdny_incidents.csv
+nyc311_housing,erm2-nwe9,"agency = 'HPD' AND (upper(complaint_type) IN ('HEAT/HOT WATER','HEATING','ELECTRIC','SAFETY') OR upper(descriptor) IN ('COOKING GAS','GAS','ELECTRIC/GAS RANGE','ELECTRIC/GAS-RANGE','SMOKE DETECTOR','SMOKE-DETECTOR','SMOKE-FUMES','CARBON MONOXIDE','CARBON MONOXIDE DETECTOR','FIRE ESCAPE','FIRE-ESCAPE')) AND created_date >= '2010-01-01T00:00:00'",2026-11-18T01:17:44+00:00,2098146,nyc311_housing.csv
+nyc311_housing_2010_2019,76ig-c548,"agency = 'HPD' AND (upper(complaint_type) IN ('HEAT/HOT WATER','HEATING','ELECTRIC','SAFETY') OR upper(descriptor) IN ('COOKING GAS','GAS','ELECTRIC/GAS RANGE','ELECTRIC/GAS-RANGE','SMOKE DETECTOR','SMOKE-DETECTOR','SMOKE-FUMES','CARBON MONOXIDE','CARBON MONOXIDE DETECTOR','FIRE ESCAPE','FIRE-ESCAPE')) AND created_date >= '2010-01-01T00:00:00'",2026-11-18T01:46:33+00:00,2645615,nyc311_housing_2010_2019.csv
+hpd_violations,wvxf-dwi5,inspectiondate >= '2010-01-01T00:00:00',2026-11-18T02:26:04+00:00,9987628,hpd_violations.csv
+hpd_complaints,ygpa-z7cr,received_date >= '2010-01-01T00:00:00',2026-11-18T04:35:59+00:00,11735245,hpd_complaints.csv

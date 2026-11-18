@@ -1,0 +1,8 @@
+{
+  "cases": 7,
+  "cutoff": "2025-01-01",
+  "data_starts": "2010-01-01",
+  "mean_pctile_pilot": 0.869,
+  "mean_pctile_downloaded": 0.884,
+  "cases_confirmed_fire_vacate": 7
+}

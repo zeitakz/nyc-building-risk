@@ -152,6 +152,22 @@ promoted-feature list is committed. The split rule is in `pipeline/splits.py`; d
   period, include a period term as a sensitivity check, and label the 2024–2025 temporal holdout as
   spanning the change. FDNY's own vacate list (`n5xc-7jfa`, 357 rows total) is too sparse to cross-check.
 
+- **Inspection regimes (draft Amendment 2; write it into ANALYSIS_PLAN.md before Phase 2 results).**
+  Avoid the word "regulated": treat three independent dimensions separately, since a building
+  can have any combination. (1) **Rent status**: rent-stabilized units (state DHCR; no clean
+  Open Data field, so use NYCDB tax-bill counts or DHCR building lists, and verify). (2) **HPD
+  financing / regulatory agreement**. (3) **HPD enforcement program**. Buildings under proactive
+  HPD programs collect violations regardless of condition. Build time-stamped variables as of
+  each cutoff from: AEP `hcir-3275` (aep_start_date,
+  discharge_date), Underlying Conditions `xpbf-ithr` (order_issue_date), Heat Sensor Program
+  `h4mf-f24e` (program_start_date, discharge_date), CONH pilot `bzxi-2tsw` (date_added),
+  HPD-financed `hg8x-zxpr` (project_start_date; 2014+ only). All have BBL; verify columns before
+  use. Use as covariate, stratify results, report fire rates by regime, and estimate the
+  detection jump (violations in the year before vs after program entry). Flag proactive-survey
+  records (complaint code LINE OF TRAVEL / SCD SURVEY RESULTS = post-2022 self-closing door
+  survey) separately from complaint-driven ones. CityFHEPS / Section 8 inspections have no public
+  building-level data: state as a limitation.
+
 ## Ideas for later (not in current scope)
 
 Separate research questions, not limited to fire. Each would get its own question, outcome and
