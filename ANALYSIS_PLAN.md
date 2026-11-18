@@ -171,3 +171,58 @@ locations, "wire screen". The review file can be rebuilt any time with
 `python pipeline/review_categories.py` (output is git-ignored because it contains raw
 violation text). The discovery stage (section 4) doesn't depend on these categories: it uses
 every raw code.
+
+### Amendment 2 — 2026-11-18 (before any results): inspection regimes
+
+**Results seen at the time: none.** No cases, controls or features had been built. Data looked
+at: the columns, row counts, date ranges and status values of the program datasets below
+(citywide, no link to cases), and the HPD complaint codes for the self-closing-door survey.
+Reason: some buildings get violations because HPD inspects them proactively, not because
+tenants complain or conditions are worse. If those buildings also differ in fire risk, Class C
+per unit could reflect the inspection regime rather than the building.
+
+**1. Three separate dimensions.** We don't use the word "regulated", and we don't merge these
+into one flag, because a building can have any combination. Each is measured **as of the
+case's cutoff date** (same rule as features: only records dated before the cutoff).
+
+| Dimension | Source (verified 2026-11-18) | Variable at cutoff | Known gaps |
+|---|---|---|---|
+| **A. HPD enforcement program** (proactive inspection) | AEP `hcir-3275` (4,387 buildings; `aep_start_date` 2007–2026, `discharge_date`) | in AEP at cutoff (started before, not yet discharged); ever in AEP before cutoff | — |
+| | Underlying Conditions `xpbf-ithr` (750; `order_issue_date` 2013–2026) | ever ordered before cutoff | no discharge date published, only current status |
+| | Heat Sensor Program `h4mf-f24e` (200; `program_start_date` 2020–2025) | ever started before cutoff | no discharge dates in the data |
+| | combined | any of the three, in program at cutoff | |
+| **B. HPD financing** | Affordable Housing Production by Building `hg8x-zxpr`, `reporting_construction_type = 'Preservation'` (4,785 buildings) | preservation project started before cutoff | only projects started 2014 or later; older regulatory agreements are missing, so this is "HPD-financed preservation since 2014" |
+| **C. Rent status** | DOF tax-bill stabilized-unit counts (NYCDB `rentstab` / `rentstab_v2`), checked against RGB/DHCR building lists | share of units stabilized in the last tax year before cutoff: none / under half / half or more | **source not yet verified**; DOF counts undercount stabilization somewhat. If no usable source is verified before Phase 2 results, this dimension is dropped and the omission stated |
+
+**Not used as a regime: Certification of No Harassment (CONH) `bzxi-2tsw`.** It is a harassment
+permit rule, not an inspection program. Its entry criteria include HPD and DOB **vacate orders**
+and AEP, so it partly encodes the outcome, and most buildings entered on one date
+(1,147 on 2022-06-24). It stays out of all models here; it may be used in the owner-portfolio
+work later (`CLAUDE.md` → Ideas for later).
+
+**2. How the regimes are used.**
+
+1. **Descriptive:** fire-vacate rates per 100,000 units, 2018–2025, by each dimension. Status
+   is taken as of January 1 of each year.
+2. **Sensitivity checks for the primary and secondary tests** (added to section 2's list;
+   reported prominently, they don't change the verdict):
+   - add A, B and C as covariates;
+   - primary test **stratified** by dimension A (any enforcement program at cutoff: yes / no). If
+     the Class C odds ratio's CI excludes 1 among buildings **not** in any program, the signal
+     isn't only a product of proactive inspection. If it appears only in program buildings, it
+     is reported as likely an inspection-regime effect.
+   - Controls are **not** matched on regime (that would discard match sets); adjustment and
+     stratification only.
+3. **Detection jump (descriptive):** for buildings in the study population that entered AEP or
+   Underlying Conditions 2012–2024, HPD violations per unit (by class) in the 12 months before vs
+   the 12 months after entry. This estimates how much a program by itself raises violation
+   counts. Aggregates only.
+4. **Proactive survey records.** HPD complaints coded `LINE OF TRAVEL / LINE OF TRAVEL / SCD SURVEY
+   RESULTS` (8,683 records, first on 2023-09-21) come from HPD's self-closing-door survey, not
+   tenants. They are excluded from complaint counts used as features and as the
+   inspection-intensity covariate, and counted separately as a survey indicator. Violations
+   issued from the survey can't be identified directly in the violations data; this is stated
+   as a limitation for H2 (self-closing doors) for cutoffs after September 2023.
+
+**3. Limitation stated on the site.** CityFHEPS and Section 8 (HQS) inspections also bring
+inspectors into buildings, but there is no public building-level data on them.
