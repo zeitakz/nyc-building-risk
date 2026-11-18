@@ -41,7 +41,7 @@ As in `CLAUDE.md` → Study design:
   lookbacks of 1 and 5 years and all prior history; cases before 2024-07-01 only; a period
   interaction term; HPD complaint count as a covariate; 3–5 units vs larger.
 
-## 3. Secondary hypotheses (three tests, Holm-corrected)
+## 3. Secondary hypotheses (Holm-corrected; see Amendment 1, which adds a fifth)
 
 Same model and data as the primary test. Each predictor is a per-unit count over a 3-year lookback
 from HPD violations **and** HPD complaints, using the keyword/category rules in
@@ -115,4 +115,47 @@ within match sets, top-decile capture). Labeled as spanning the 2024–25 change
 
 ## Deviations
 
-*None yet.* Format: date — what changed — why — whether results had been seen.
+Format: date — what changed — why — whether results had been seen.
+
+### Amendment 1 — 2026-11-17 (before any results)
+
+**Results seen at the time: none.** No cases, controls or features had been built. The only data
+looked at was citywide: which values exist in the HPD, 311 and DOB datasets, and FDNY Bureau of
+Fire Investigations cause counts by season (no addresses, so they can't be linked to buildings).
+Reason: ideas from a planning discussion on the same day as the original plan.
+
+1. **New secondary hypothesis 5: heat and gas outages.** Outages push tenants to space heaters,
+   ovens and hot plates. Predictor: per-unit count over the 3-year lookback of
+   - HPD heat/hot water violations and complaints;
+   - "no gas" records: HPD violations to "provide an adequate supply of gas" (§ 27-2070), and HPD
+     complaints *range: no gas*, *no gas or electricity*, *pilot light out*;
+   - 311 HPD `HEAT/HOT WATER` / `HEATING` reports.
+
+   Holm correction now runs across **five** secondary hypotheses.
+2. **Hypotheses 1 and 2 widened** (the definitions add items; the tests are unchanged):
+   - H1 ignition adds appliance gas leaks (shut-off valve leaking, flex hose broken, gas fumes,
+     gas leak), sparking outlets at appliances, and broken/missing stove knobs and knob covers.
+   - H2 detection/spread adds air-conditioner units obstructing fire-escape windows or egress.
+     Most HPD air-conditioner violations are of this kind, not electrical.
+3. **Season as an effect modifier** (pre-specified, reported whatever the result, not pass/fail).
+   Event season = cold (Nov–Mar) or warm (May–Sep); April and October are excluded from this
+   analysis only. Two interaction terms: H5 outages × cold, and H1 electrical × warm. Background
+   from the FDNY data: space heaters and candles are mostly winter causes; extension cords and
+   lithium-ion batteries are more common in summer.
+4. **Construction permits** on the lot and on adjacent lots in the year before cutoff are added to
+   discovery as a feature family. DOB NOW permits (`rbx6-tga4`) start around 2016; earlier permits
+   need the DOB BIS permit dataset (ID to verify).
+5. **Keyword rules.** `pipeline/hpd_categories.yml` uses whole-word matching. For example, "range"
+   must not match "arrange", which turned up in a sample stove violation about garbage collection.
+   Each category is committed with a sample of matched and unmatched violation texts reviewed by
+   the user, before any feature is computed against cases.
+6. **No belief-based ranking of features.** We considered labeling features in advance as
+   "direct / indirect / remote" fire hazards and decided against it. Instead, the discovery
+   report shows the full distribution of associations. If many unrelated-looking features predict
+   fire about equally, that is reported as evidence of a general neglect or attention signal,
+   not a fire-specific one. Appliance-neglect signals (such as refrigerator door seals, a possible
+   marker of old equipment) stay in discovery.
+7. **Known blind spots, to state on the site:** clothes dryers (FDNY recorded about 220 dryer fires
+   in multiple dwellings, but HPD has only about 450 dryer violations, because laundry rooms are
+   rarely inspected); lithium-ion batteries and fans (almost no housing records). The discovery
+   text and 311 features may pick up indirect traces.
