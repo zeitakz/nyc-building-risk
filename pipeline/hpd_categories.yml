@@ -1,0 +1,344 @@
+# HPD violation and complaint categories (ANALYSIS_PLAN.md sections 3-4, Amendment 1).
+#
+# How matching works (pipeline/categorize.py):
+# - Violations (wvxf-dwi5): a violation belongs to a category if its `ordernumber` is in
+#   `order_codes`, OR its `novdescription` matches any `text` pattern; and it matches no
+#   `text_exclude` pattern. Patterns are case-insensitive regular expressions; write whole-word
+#   boundaries (\b) explicitly. "range" must not match "arrange".
+# - Complaints (ygpa-z7cr): a complaint problem belongs to a category if (major, minor) matches
+#   a listed pair (minor omitted = any minor) and, if given, its problem_code matches `problem`.
+# - Categories may overlap (a dumbwaiter door that won't self-close is both `dumbwaiter` and
+#   `self_closing_doors`). A record in no category counts as "other".
+# - `hypothesis` links a category to ANALYSIS_PLAN.md: H1 ignition, H2 detection/spread/egress,
+#   H4 equipment, H5 outages; "descriptive" = reported on its own; "discovery" = only in the
+#   discovery stage. H3 (owner response) is computed from violation status, not categories.
+#
+# Default decisions (2026-11-17, user chose defaults rather than item-by-item review): outlet
+# child-safety covers -> discovery (child_safety_covers); flickering/dim and wet/flooded light
+# fixtures stay in electrical_wiring. Review samples: python pipeline/review_categories.py
+#
+# Built from the real order codes and complaint codes on 2026-11-17. Changes after cases are
+# built go in ANALYSIS_PLAN.md Deviations.
+
+version: 1
+
+categories:
+
+  # ---------------- H1: ignition sources ----------------
+  electrical_wiring:
+    hypothesis: H1
+    description: Unsafe, exposed or illegal wiring; defective outlets and switches.
+    violations:
+      order_codes: [689, 989]
+      text:
+        - '\bWIR(E|ES|ED|ING)\b'
+        - '\bBX\b'
+        - '\bJUNCTION BOX(ES)?\b'
+        - '\bELECTRIC(AL)? (OUTLET|OUTLETS|SWITCH|SWITCHES|PANEL|FIXTURE|FIXTURES|BOX|CORD|CORDS)\b'
+        - '\bEXTENSION CORDS?\b'
+      text_exclude:
+        - '\bWIRE(D)? GLASS\b'          # fire-rated wired glass in doors: not wiring
+        - '\bWIRE MESH\b'
+        - '\bCHICKEN WIRE\b'
+        - '\bWIRE (GUARD|GUARDS|S\w*EEN|S\w*EENS)\b'   # incl. typos like "WIRE SEREEN"
+        - '\b(CHILD )?SAFETY (COVER|COVERS|CAP|CAPS)\b'   # outlet child-safety covers: see child_safety_covers
+    complaints:
+      - {major: ELECTRIC, minor: WIRING}
+      - {major: ELECTRIC, minor: OUTLET/SWITCH}
+      - {major: ELECTRIC, minor: LIGHTING, problem: 'DIMS OR FLICKERS|WET OR FLOODED'}
+
+  electrical_sparking:
+    hypothesis: H1
+    description: Sparks from outlets or appliances (rare, direct ignition signal).
+    violations:
+      text: ['(?<!NOT )\bSPARK(S|ING)?\b']
+    complaints:                        # "EXPOSED, NOT SPARKING" must not count as sparking
+      - {major: APPLIANCE, problem: '(?<!NOT )SPARK'}
+      - {major: ELECTRIC, problem: '(?<!NOT )SPARK'}
+
+  appliance_gas_leak:
+    hypothesis: H1
+    description: Gas leaks or fumes at stoves and gas lines (not outages).
+    violations:
+      text:
+        - '\bGAS\b.{0,40}\b(LEAK|LEAKS|LEAKING|LEAKAGE|ODOR|ODORS|FUMES|ESCAPING)\b'
+        - '\b(LEAK|LEAKS|LEAKING|ODOR|FUMES)\b.{0,40}\bGAS\b'
+        - '\bFLEX(IBLE)? (GAS )?(HOSE|CONNECTOR|LINE)\b'
+      text_exclude:
+        - '\bGASKET'
+        - '\bNOTICE\b'                 # code 1506: post a notice on what to do if a gas leak is suspected
+    complaints:
+      - {major: APPLIANCE, minor: ELECTRIC/GAS RANGE, problem: 'LEAK|FUMES|FLEX HOSE'}
+      - {major: GENERAL, minor: COOKING GAS, problem: 'LEAK'}
+
+  stove_controls:
+    hypothesis: H1
+    description: Broken or missing stove knobs; missing stove knob covers (young children).
+    violations:
+      text:                            # stove/range/oven only: radiator and faucet knobs are not stove controls
+        - '\b(STOVE|RANGE|OVEN|BURNER)S? (CONTROL )?KNOBS?\b'
+        - '\bKNOBS?\b.{0,30}\b(STOVE|RANGE|OVEN)S?\b'
+        - '\bKNOB COVERS?\b'
+    complaints:
+      - {major: APPLIANCE, minor: ELECTRIC/GAS RANGE, problem: 'KNOB'}
+
+  unlawful_cooking_space:
+    hypothesis: H1
+    description: Illegal kitchens / cooking spaces, often in illegal units.
+    violations:
+      order_codes: [741, 1041]
+      text: ['\bUNLAWFUL COOKING\b', '\bHOT ?PLATES?\b']
+
+  # ---------------- H2: detection, spread, egress ----------------
+  smoke_detector:
+    hypothesis: H2
+    description: Missing or defective smoke detectors (not notice-posting violations).
+    violations:
+      order_codes: [702]
+      text: ['\bSMOKE (DETECTOR|DETECTORS|DETECTING|ALARM|ALARMS)\b']
+      text_exclude: ['\bPOST\b.{0,40}\bNOTICE\b']
+    complaints:
+      - {major: SAFETY, minor: SMOKE DETECTOR}
+      - {major: NONCONST, minor: SMOKE DETECTOR}
+
+  co_detector:
+    hypothesis: H2
+    description: Missing or defective carbon monoxide detectors (not notice-posting).
+    violations:
+      order_codes: [1502, 1503]
+      text: ['\bCARBON MONOXIDE (DETECTOR|DETECTORS|DETECTING)\b']
+      text_exclude: ['\bPOST\b.{0,40}\bNOTICE\b']
+    complaints:
+      - {major: SAFETY, minor: CARBON MONOXIDE DETECTOR}
+      - {major: NONCONST, minor: CARBON MONOXIDE}
+
+  self_closing_doors:
+    hypothesis: H2
+    description: Doors that must self-close (apartment, stair, roof, dumbwaiter) but don't.
+    violations:
+      order_codes: [530, 536, 542, 693]
+      text: ['\bSELF[- ]?CLOS(ING|ER|ERS|E)\b']
+    complaints:
+      - {major: DOOR/WINDOW, minor: DOOR, problem: 'NOT SELF-CLOSING'}
+      - {major: GENERAL, minor: DOORS, problem: 'NOT SELF CLOSING|DUMBWAITER'}
+      - {major: DOOR/WINDOW, minor: DOOR TO DUMBWAITER}
+      - {major: LINE OF TRAVEL}        # self-closing door survey results
+
+  vertical_openings:
+    hypothesis: H2
+    description: Open shafts or chutes that let fire and smoke travel between floors.
+    violations:
+      order_codes: [529]               # compactor chute doors
+      text:
+        - '\bOPEN (DUMB ?WAITER )?SHAFTS?\b'
+        - '\bDUMB ?WAITER\b.{0,60}\b(OPEN|UNSEALED|NOT SEALED|MISSING|DOOR|DOORS)\b'
+        - '\bCHUTE DOORS?\b'
+      text_exclude: ['\bDUMB ?WAITER SERVICE IS NOT PROVIDED\b']
+    complaints:
+      - {major: DOOR/WINDOW, minor: DOOR TO DUMBWAITER}
+      - {major: GENERAL, minor: DOORS, problem: 'DUMBWAITER'}
+
+  fire_escape_egress:
+    hypothesis: H2
+    description: Defective or blocked fire escapes, drop ladders, exits and passageways.
+    violations:
+      order_codes: [106, 512, 513, 514, 521, 522, 524, 538, 539, 838]
+      text:
+        - '\bFIRE ESCAPES?\b'
+        - '\bDROP ?LADDERS?\b'
+        - '\bEGRESS\b'
+        - '\bFIREPROOF PASSAGEWAY\b'
+        - '\bENCUMBRANCES?\b'
+    complaints:
+      - {major: SAFETY, minor: FIRE ESCAPE}
+
+  egress_obstruction:
+    hypothesis: H2
+    description: >
+      Things that trap people: key-operated or double-cylinder locks, illegal gates or bars on
+      fire-escape windows, air conditioners blocking fire-escape windows.
+    violations:
+      order_codes: [526, 546, 826]
+      text:
+        - '\bDOUBLE[- ]CYLINDER\b'
+        - '\bKEY[- ]OPERATED\b'
+        - '\bELECTROMAGNETIC LOCK'
+        - '\bAIR[- ]CONDITION(ER|ERS|ING)?\b.{0,80}\b(FIRE ESCAPE|EGRESS)\b'
+        - '\b(FIRE ESCAPE|EGRESS)\b.{0,80}\bAIR[- ]CONDITION(ER|ERS|ING)?\b'
+        - '\bOBSTRUCTING BARS\b'
+        - '\bUNLAWFUL GATES?\b'
+    complaints:
+      - {major: DOOR/WINDOW, minor: DOOR, problem: 'NEEDS KEY FOR EXIT'}
+      - {major: SAFETY, minor: FIRE ESCAPE, problem: 'WINDOW BROKEN OR BLOCKED|BLOCKED'}
+
+  sprinkler:
+    hypothesis: H2
+    description: Broken, missing or painted sprinklers.
+    violations:
+      text: ['\bSPRINKLERS?\b']
+    complaints:
+      - {major: SAFETY, minor: SPRINKLER}
+      - {major: PLUMBING, minor: SPRINKLER}
+
+  # ---------------- H4: building equipment neglect (HPD side; DOB codes are in 04_features) ----
+  elevator_hpd:
+    hypothesis: H4
+    description: >
+      HPD violations mentioning elevators. HPD elevator complaints are mostly cosmetic
+      (dirty car, broken mirror), so only the mechanical ones are included.
+    violations:
+      text: ['\bELEVATORS?\b']
+    complaints:
+      - {major: CONSTRUCTION, minor: ELEVATOR, problem: 'DEFECTIVE|INOPERA|SHAFT|DOOR MISSING|LEVELING'}
+
+  boiler_heat_plant:
+    hypothesis: H4
+    description: Boiler and heating-plant defects, smoke or fumes from the plant.
+    violations:
+      text:
+        - '\b(BOILER|BOILERS|BURNER|BURNERS|HEATING PLANT)\b.{0,50}\b(DEFECTIVE|BROKEN|LEAK|LEAKING|LEAKS|SMOK\w*|FUMES|SOOT|INOPERATIVE|REPAIR|REPLACE)\b'
+        - '\b(DEFECTIVE|BROKEN|LEAKING|INOPERATIVE|REPAIR|REPLACE)\b.{0,50}\b(BOILER|BOILERS|BURNER|BURNERS)\b(?! ROOM)'
+      text_exclude:
+        - '\bACCESS TO BUILDINGS HEATING SYSTEM\b'   # code 672: boiler room locked (counted as heat_outage)
+        - '\b(IN|AT) (THE )?BOILER ?ROOM\b'          # boiler room as a location only
+    complaints:
+      - {major: HEATING, minor: HEAT-PLANT}
+      - {major: PLUMBING, minor: BOILER}
+      - {major: NONCONST, minor: SMOKE-FUMES}
+
+  # ---------------- H5: heat and gas outages ----------------
+  heat_outage:
+    hypothesis: H5
+    description: No or inadequate heat (pushes tenants to space heaters and ovens).
+    violations:
+      order_codes: [664, 666, 672, 964, 966]
+      text: ['\bADEQUATE SUPPLY OF HEAT\b']
+    complaints:
+      - {major: HEAT/HOT WATER}
+      - {major: HEATING, minor: HEAT RELATED}
+      - {major: HEATING, minor: RADIATOR}
+
+  hot_water_outage:
+    hypothesis: H5
+    description: No or inadequate hot water.
+    violations:
+      order_codes: [577, 670, 877, 970]
+      text: ['\bSUPPLY OF HOT WATER\b', '\bPROVIDE HOT WATER\b']
+    complaints:
+      - {major: HEAT/HOT WATER}
+
+  gas_outage:
+    hypothesis: H5
+    description: Cooking gas shut off or not supplied (pushes tenants to hot plates).
+    violations:
+      order_codes: [742, 1042]
+      text: ['\bSUPPLY OF GAS\b']
+    complaints:
+      - {major: GENERAL, minor: COOKING GAS, problem: 'SHUT'}
+      - {major: APPLIANCE, minor: ELECTRIC/GAS RANGE, problem: 'NO GAS|PILOT LIGHT OUT'}
+
+  # ---------------- descriptive (reported on its own, per the plan) ----------------
+  dumbwaiter:
+    hypothesis: descriptive
+    description: Any dumbwaiter record, including waste-collection signs (marks presence).
+    violations:
+      text: ['\bDUMB ?WAITERS?\b']
+    complaints:
+      - {major: DOOR/WINDOW, minor: DOOR TO DUMBWAITER}
+      - {major: GENERAL, minor: DOORS, problem: 'DUMBWAITER'}
+
+  space_heater:
+    hypothesis: descriptive
+    description: Space-heater records (rare in HPD data; FDNY's main winter cause).
+    violations:
+      text: ['\b(SPACE|PORTABLE) HEATERS?\b']
+    complaints:
+      - {major: HEATING, minor: SPACE HEATER}
+
+  # ---------------- discovery-only groups ----------------
+  electric_outage:
+    hypothesis: discovery
+    description: No electric supply / power outages.
+    violations:
+      order_codes: [688, 988]
+    complaints:
+      - {major: ELECTRIC, minor: ELECTRIC-SUPPLY}
+      - {major: ELECTRIC, minor: POWER OUTAGE}
+      - {major: ELECTRIC, minor: NO LIGHTING}
+
+  appliance_other:
+    hypothesis: discovery
+    description: Other stove/refrigerator/appliance defects (possible marker of old equipment).
+    violations:
+      text: ['\b(GAS )?RANGE\b', '\bSTOVE\b', '\bOVEN\b', '\bREFRIGERATORS?\b']
+      text_exclude: ['\bSUPPLY OF GAS\b']
+    complaints:
+      - {major: APPLIANCE}
+
+  illegal_conversion:
+    hypothesis: discovery
+    description: Illegal units, rooming units, cellar apartments, unpermitted alterations.
+    violations:
+      order_codes: [491, 495, 761, 1051, 1061]
+      text: ['\bROOMING UNITS?\b', '\bDISCONTINUE (THE )?USE OF ROOMS\b', '\bILLEGAL(LY)? (CONVERTED|OCCUPIED|APARTMENT)\b']
+    complaints:
+      - {major: NONCONST, minor: ILLEGAL}
+
+  child_safety_covers:
+    hypothesis: discovery
+    description: >
+      Outlet child-safety covers/caps. Required where young children live, so likely a marker of
+      who lives there rather than a wiring hazard; kept out of H1 (default decision, 2026-11-17).
+    violations:
+      text: ['\b(CHILD )?SAFETY (COVER|COVERS|CAP|CAPS)\b.{0,30}\bOUTLETS?\b', '\bOUTLET SAFETY (COVER|COVERS|CAP|CAPS)\b']
+    complaints:
+      - {major: SAFETY, minor: OUTLET COVER}
+
+  window_guards:
+    hypothesis: discovery
+    violations:
+      order_codes: [790, 791]
+    complaints:
+      - {major: SAFETY, minor: WINDOW GUARD BROKEN/MISSING}
+
+  water_leaks:
+    hypothesis: discovery
+    violations:
+      order_codes: [507, 583, 807, 883]
+      text: ['\bLEAK(S|Y|ING)?\b']
+      text_exclude: ['\bGAS\b']
+    complaints:
+      - {major: WATER LEAK}
+      - {major: PLUMBING, minor: WATER-LEAKS}
+
+  mold:
+    hypothesis: discovery
+    violations:
+      order_codes: [550]
+      text: ['\bMOLD\b']
+    complaints:
+      - {major: GENERAL, minor: MOLD}
+      - {major: UNSANITARY CONDITION, minor: MOLD}
+
+  pests:
+    hypothesis: discovery
+    violations:
+      order_codes: [566, 567, 568, 569, 570, 868, 869, 870]
+      text: ['\b(ROACHES|MICE|RATS|RODENTS|VERMIN|BEDBUGS)\b']
+    complaints:
+      - {major: UNSANITARY CONDITION, minor: PESTS}
+      - {major: NONCONST, minor: VERMIN}
+
+  lead_paint:
+    hypothesis: discovery
+    violations:
+      order_codes: [614, 616, 617, 618, 619, 622, 623, 624]
+      text: ['\bLEAD[- ]BASED PAINT\b']
+
+  admin_paperwork:
+    hypothesis: discovery
+    description: >
+      Registration, notices and filing failures. No physical hazard; a marker of owner
+      compliance (the pilot's "registration failures").
+    violations:
+      order_codes: [484, 485, 497, 500, 671, 700, 708, 722, 778, 780, 1501, 1506, 1507, 1520]

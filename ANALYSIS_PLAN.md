@@ -159,3 +159,15 @@ Reason: ideas from a planning discussion on the same day as the original plan.
    in multiple dwellings, but HPD has only about 450 dryer violations, because laundry rooms are
    rarely inspected); lithium-ion batteries and fans (almost no housing records). The discovery
    text and 311 features may pick up indirect traces.
+
+### Deviation 1 — 2026-11-17 (before any results)
+
+**Results seen: none.** Amendment 1 item 5 said the user would review each category's samples
+before the rules were committed. In practice we reviewed the H1 (ignition) categories together,
+which found and fixed two bugs (radiator/faucet knobs counted as stove controls; "exposed, NOT
+sparking" counted as sparking). For the rest, the user chose default decisions instead of
+item-by-item review. Earlier fixes from the automated review: gas-leak notices, boiler-room
+locations, "wire screen". The review file can be rebuilt any time with
+`python pipeline/review_categories.py` (output is git-ignored because it contains raw
+violation text). The discovery stage (section 4) doesn't depend on these categories: it uses
+every raw code.
