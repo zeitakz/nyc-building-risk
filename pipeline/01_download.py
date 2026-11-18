@@ -7,14 +7,26 @@ Usage:
 
 Pages through the API with $limit/$offset, ordered by a stable key, and records
 the query, UTC timestamp and row count in data/raw/MANIFEST.csv.
-Set SOCRATA_APP_TOKEN to raise rate limits (optional).
+Set SOCRATA_APP_TOKEN to raise rate limits (optional), either in the environment or in a
+git-ignored .env file at the repo root containing a line: SOCRATA_APP_TOKEN=...
 """
 import argparse, csv, datetime as dt, io, os, pathlib, sys, time
 import requests
 
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 BASE = "https://data.cityofnewyork.us/resource/{id}.csv"
-RAW = pathlib.Path(__file__).resolve().parents[1] / "data" / "raw"
+RAW = ROOT / "data" / "raw"
 PAGE = 50_000
+
+def _load_dotenv(path=ROOT / ".env"):
+    """Read KEY=VALUE lines from .env into os.environ (existing env vars win)."""
+    if not path.exists(): return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+_load_dotenv()
 
 # id, date column used for --since, stable order key (must be unique; else :id), optional extra filter, columns (None = all)
 DATASETS = {
@@ -24,9 +36,16 @@ DATASETS = {
              "approveddate,novdescription,novissueddate,ordernumber,currentstatus,currentstatusdate,violationstatus"),
     "dob_violations": dict(id="3h2n-5cm9", date="issue_date", order=":id", where=None,
         cols="number,boro,block,lot,bin,issue_date,violation_type_code,violation_category,description,disposition_date"),
-    "dob_ecb": dict(id="6bgk-3dad", date="issue_date", order=":id", where=None, cols=None),
+    "dob_ecb": dict(id="6bgk-3dad", date="issue_date", order=":id", where=None,
+        cols="isn_dob_bis_extract,ecb_violation_number,ecb_violation_status,dob_violation_number,bin,boro,block,lot,"
+             "issue_date,served_date,hearing_date,hearing_status,severity,violation_type,violation_description,"
+             "infraction_code1,section_law_description1,aggravated_level,penality_imposed,amount_paid,balance_due,"
+             "certification_status,respondent_name"),
     "dob_complaints": dict(id="eabe-havv", date="date_entered", order=":id", where=None, cols=None),
-    "dob_now_permits": dict(id="rbx6-tga4", date="issued_date", order=":id", where=None, cols=None),
+    "dob_now_permits": dict(id="rbx6-tga4", date="issued_date", order=":id", where=None,
+        cols="job_filing_number,work_permit,sequence_number,filing_reason,borough,block,lot,bin,bbl,work_on_floor,"
+             "work_type,approved_date,issued_date,expired_date,job_description,estimated_job_costs,permit_status,"
+             "owner_business_name,owner_name"),
     "pluto": dict(id="64uk-42ks", date=None, order="bbl", where=None,
         cols="bbl,borough,block,lot,address,bldgclass,landuse,yearbuilt,unitsres,unitstotal,numfloors,"
              "lotarea,bldgarea,ownername,zipcode,bct2020,latitude,longitude"),
@@ -36,7 +55,10 @@ DATASETS = {
     "nyc311_housing_2010_2019": dict(id="76ig-c548", date="created_date", order="unique_key",
         where=None, cols=None),
     # Verified 2026-11-16 against https://data.cityofnewyork.us/api/views/<id>.json
-    "hpd_complaints": dict(id="ygpa-z7cr", date="received_date", order="problem_id", where=None, cols=None),
+    "hpd_complaints": dict(id="ygpa-z7cr", date="received_date", order="problem_id", where=None,
+        cols="problem_id,complaint_id,building_id,borough,block,lot,bbl,bin,received_date,type,major_category,"
+             "minor_category,problem_code,complaint_status,complaint_status_date,problem_status,problem_status_date,"
+             "unit_type,space_type"),
     "hpd_registrations": dict(id="tesw-yqqr", date=None, order=":id", where=None, cols=None),
     "hpd_contacts": dict(id="feu5-w2e2", date=None, order=":id", where=None, cols=None),
     # FDNY NFIRS incidents: no BBL/BIN or house number (street, zip, borough only); 2013 to 2025-09.
@@ -69,6 +91,20 @@ def socrata_date(col, since, dataset):
         return None  # MM/DD/YYYY text; filter after download
     return f"{col} >= '{since}T00:00:00'"
 
+def get_page(url, params, headers, attempts=8):
+    """GET one page, retrying network errors and non-200s with backoff (up to ~4 min total)."""
+    for attempt in range(attempts):
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=300)
+            if r.status_code == 200: return r
+            err = f"HTTP {r.status_code}"
+        except requests.RequestException as e:
+            err = repr(e)
+        wait = min(2 ** attempt, 60)
+        print(f"  retry {attempt + 1}/{attempts} at offset {params['$offset']} in {wait}s: {err}", file=sys.stderr)
+        time.sleep(wait)
+    raise RuntimeError(f"giving up at offset {params['$offset']}: {err}")
+
 def download(name, since=None, max_rows=None):
     spec = DATASETS[name]
     where = [w for w in [spec["where"], socrata_date(spec["date"], since, name) if (since and spec["date"]) else None] if w]
@@ -78,15 +114,12 @@ def download(name, since=None, max_rows=None):
     headers = {"X-App-Token": os.environ["SOCRATA_APP_TOKEN"]} if os.environ.get("SOCRATA_APP_TOKEN") else {}
     RAW.mkdir(parents=True, exist_ok=True)
     out = RAW / f"{name}.csv"
+    part = out.with_suffix(".csv.part")  # renamed to .csv only when the download completes
     total, offset, wrote_header = 0, 0, False
-    with open(out, "w", newline="") as f:
+    with open(part, "w", newline="") as f:
         while True:
             params["$offset"] = offset
-            for attempt in range(5):
-                r = requests.get(BASE.format(id=spec["id"]), params=params, headers=headers, timeout=120)
-                if r.status_code == 200: break
-                time.sleep(2 ** attempt)
-            r.raise_for_status()
+            r = get_page(BASE.format(id=spec["id"]), params, headers)
             text = r.text
             lines = text.splitlines(keepends=True)
             if len(lines) <= 1: break
@@ -96,6 +129,7 @@ def download(name, since=None, max_rows=None):
             total += n; offset += PAGE
             print(f"  {name}: {total:,} rows", file=sys.stderr)
             if n < params["$limit"] or (max_rows and total >= max_rows): break
+    part.replace(out)
     manifest = RAW / "MANIFEST.csv"
     new = not manifest.exists()
     with open(manifest, "a", newline="") as m:

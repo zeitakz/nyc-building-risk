@@ -8,3 +8,4 @@ shap>=0.45
 matplotlib>=3.8
 jupyter
 pyyaml
+pytest

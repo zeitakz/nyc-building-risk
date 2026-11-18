@@ -88,6 +88,11 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
 
 ## Study design (fires)
 
+**`ANALYSIS_PLAN.md` is the pre-registered plan** (primary and secondary hypotheses, the
+discovery/confirmation split, pass/fail rules). Follow it. Any change goes under its
+Deviations section with date and reason. Never look at confirmation-set results before the
+promoted-feature list is committed. The split rule is in `pipeline/splits.py`; don't change it.
+
 0. **Study population: private multiple dwellings.** Cases *and* controls must have PLUTO
    `unitsres >= 3` and not be NYCHA (`ownername` matching "HOUSING AUTHORITY"). Reason: the outcome
    only exists where HPD has jurisdiction. 2018–2025 fire-vacate rates per 100k units: NYCHA 0.6,
@@ -115,7 +120,7 @@ the user has Postgres set up; otherwise stick with Socrata + DuckDB.
      certification of repair (verify how this appears in the data)
    - DOB: violation type groups — maintenance/construction (`C`), emergency/unsafe
      (`IMEGNCY`, `UB`, `EGNCY`), failed-to-certify hazard (`AEUHAZ1`), boiler filings
-     (`LBLVIO`, `LL6291`), energy/benchmarking (`BENCH`, `EARCX`, `EGRADE`), elevator (`E*`)
+     (`LBLVIO`, `LL6291`), energy/benchmarking (`BENCH`, `EARCX`, `EGRADE`), elevator (`E`, `EVCAT*` only; a bare `E*` prefix would also catch `EGRADE`, `EARCX`, `EGNCY`)
    - DOB complaints by category (illegal conversion, work without permit, etc.)
    - 311 heat/gas/electrical/smoke reports
    - Building traits: age, units, floors, building class
@@ -184,6 +189,7 @@ write-up; reuse the pipeline and data where it fits.
 
 ```
 CLAUDE.md            this file
+ANALYSIS_PLAN.md     pre-registered hypotheses, split rule, pass/fail criteria
 README.md            public-facing overview
 requirements.txt
 pilot/               the original small-sample study (hand-transcribed aggregates); keep as-is
